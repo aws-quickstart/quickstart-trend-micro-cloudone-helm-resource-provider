@@ -1,0 +1,9 @@
+{
+  "Name": "{{TrendMicroContractTestReleaseName}}",
+  "ID": "{{TrendMicroContractTestID}}",
+  "RoleArn": "{{TrendMicroContractTestHelmRoleArn}}",
+  "Values": {
+    "cloudOne.admissionController.apiKey": "{{TrendMicroContractTestAdmissionControllerAPIKey}}",
+    "cloudOne.runtimeSecurity.apiKey": "{{TrendMicroContractTestRuntimeSecurityAPIKey}}",
+    "cloudOne.runtimeSecurity.secret": "{{TrendMicroContractTestRuntimeSecuritySecret}}"
+  },

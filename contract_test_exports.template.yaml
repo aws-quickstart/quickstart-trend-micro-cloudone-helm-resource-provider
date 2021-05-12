@@ -1,0 +1,240 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Parameters:
+  ClusterName:
+    Type: String
+    Default: trend-contract-test
+  ReleaseName:
+    Type: String
+    Default: trend-contract-test
+  AdmissionControllerAPIKey:
+    Type: String
+    NoEcho: true
+  RuntimeSecurityAPIKey:
+    Type: String
+    NoEcho: true
+  RuntimeSecuritySecret:
+    Type: String
+    NoEcho: true
+Resources:
+  ControlPlaneRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      Policies:
+        - PolicyName: ec2-describe-policy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ec2:DescribeAccountAttributes
+                  - ec2:DescribeAddresses
+                  - ec2:DescribeInternetGateways
+                Resource: '*'
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: eks.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/AmazonEKSClusterPolicy'
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/AmazonEKSServicePolicy'
+  HelmRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      Policies:
+        - PolicyName: helm-policy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                  - kms:Decrypt
+                  - eks:DescribeCluster
+                  - s3:GetObject
+                  - sts:AssumeRole
+                  - iam:PassRole
+                  - iam:ListRolePolicies
+                  - iam:ListAttachedRolePolicies
+                  - iam:GetRole
+                  - iam:GetPolicy
+                  - iam:GetPolicyVersion
+                  - ec2:CreateNetworkInterface
+                  - ec2:DeleteNetworkInterface
+                  - ec2:Describe*
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - lambda:*
+                Resource: '*'
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+                - resources.cloudformation.amazonaws.com
+              AWS: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:root'
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/AmazonS3ReadOnlyAccess'
+  VPCStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub 'https://aws-quickstart.s3.us-east-1.amazonaws.com/quickstart-aws-vpc/templates/aws-vpc.template'
+      Parameters:
+        AvailabilityZones: !Sub
+                            - "${Sub1},${Sub2}"
+                            - Sub1: !Select [ "0", Fn::GetAZs: !Ref 'AWS::Region']
+                              Sub2: !Select [ "1", Fn::GetAZs: !Ref 'AWS::Region']
+        NumberOfAZs: 2
+        PrivateSubnet1ACIDR: '10.0.0.0/24'
+        PrivateSubnet2ACIDR: '10.0.1.0/24'
+        PrivateSubnet3ACIDR: '10.0.2.0/24'
+        PrivateSubnetATag2: "kubernetes.io/role/internal-elb="
+        PublicSubnet1CIDR: '10.0.10.0/24'
+        PublicSubnet2CIDR: '10.0.11.0/24'
+        PublicSubnet3CIDR: '10.0.12.0/24'
+        PublicSubnetTag2: "kubernetes.io/role/elb="
+        VPCCIDR: '10.0.0.0/16'
+  ControlPlaneSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Cluster communication
+      VpcId: !GetAtt VPCStack.Outputs.VPCID
+  Cluster:
+    Type: "AWSQS::EKS::Cluster"
+    Properties:
+      Name: !Ref ClusterName
+      RoleArn: !GetAtt ControlPlaneRole.Arn
+      KubernetesNetworkConfig:
+        ServiceIpv4Cidr: "192.168.0.0/16"
+      ResourcesVpcConfig:
+        SubnetIds:
+          - !GetAtt VPCStack.Outputs.PrivateSubnet1AID
+          - !GetAtt VPCStack.Outputs.PrivateSubnet2AID
+        SecurityGroupIds:
+          - !Ref ControlPlaneSecurityGroup
+        PublicAccessCidrs:
+          - 0.0.0.0/0
+        EndpointPublicAccess: true
+      KubernetesApiAccess:
+        Roles:
+          - Arn: !GetAtt HelmRole.Arn
+            Username: "AdminRole"
+            Groups: [ "system:masters" ]
+  WorkerRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/AmazonEKSWorkerNodePolicy'
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/AmazonEKS_CNI_Policy'
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly'
+  EKSNodegroup:
+    Type: 'AWS::EKS::Nodegroup'
+    Properties:
+      ClusterName: !Ref Cluster
+      NodeRole: !GetAtt WorkerRole.Arn
+      ScalingConfig:
+        MinSize: 1
+        DesiredSize: 1
+        MaxSize: 3
+      Subnets:
+        - !GetAtt VPCStack.Outputs.PrivateSubnet1AID
+        - !GetAtt VPCStack.Outputs.PrivateSubnet2AID
+  IDGenRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Path: "/"
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
+  IDGenFunction:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Timeout: 300
+      Runtime: python3.7
+      Handler: index.handler
+      Role: !GetAtt IDGenRole.Arn
+      Code:
+        ZipFile: !Sub |
+          import json
+          import base64
+          import cfnresponse
+          import logging
+
+
+          def handler(event, context):
+              print(event)
+              status = cfnresponse.SUCCESS
+              physical_id = event.get('PhysicalResourceId')
+              responseData = {}
+              try:
+                  if  (event['RequestType'] == 'Create' or event['RequestType'] == 'Update'):
+                      id = {
+                          "ClusterID": event['ResourceProperties']['ClusterID'],
+                          "Region": event['ResourceProperties']['Region'],
+                          "Name": event['ResourceProperties']['Name'],
+                          "Namespace": event['ResourceProperties']['Namespace']
+                      }
+
+                      responseData['ID'] = base64.standard_b64encode(bytes(json.dumps(id), encoding='utf8')).decode("utf-8").rstrip("=")
+                      print(responseData['ID'])
+              except Exception:
+                  logging.error('Unhandled exception', exc_info=True)
+                  status = cfnresponse.FAILED
+              finally:
+                  cfnresponse.send(event, context, status, responseData, physicalResourceId=physical_id)
+  IDGen:
+    Type: "AWS::CloudFormation::CustomResource"
+    Properties:
+      ServiceToken: !GetAtt IDGenFunction.Arn
+      ClusterID: !Ref ClusterName
+      Region: !Ref AWS::Region
+      Name: !Ref ReleaseName
+      Namespace: default
+Outputs:
+  ClusterName:
+    Value: !Ref Cluster
+    Export:
+      Name: TrendMicroContractTestClusterName
+  HelmRoleArn:
+    Value: !GetAtt HelmRole.Arn
+    Export:
+      Name: TrendMicroContractTestHelmRoleArn
+  ReleaseName:
+    Value: !Ref ReleaseName
+    Export:
+      Name: TrendMicroContractTestReleaseName
+  ID:
+    Value: !GetAtt IDGen.ID
+    Export:
+      Name: TrendMicroContractTestID
+  RuntimeSecuritySecret:
+    Value: !Ref RuntimeSecuritySecret
+    Export:
+      Name: TrendMicroContractTestRuntimeSecuritySecret
+  RuntimeSecurityAPIKey:
+    Value: !Ref RuntimeSecurityAPIKey
+    Export:
+      Name: TrendMicroContractTestRuntimeSecurityAPIKey
+  AdmissionControllerAPIKey:
+    Value: !Ref AdmissionControllerAPIKey
+    Export:
+      Name: TrendMicroContractTestAdmissionControllerAPIKey

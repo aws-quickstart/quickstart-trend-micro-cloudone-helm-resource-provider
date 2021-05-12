@@ -1,0 +1,76 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Resources:
+  IDGenRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Path: "/"
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
+  IDGenFunction:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Timeout: 300
+      Runtime: python3.7
+      Handler: index.handler
+      Role: !GetAtt IDGenRole.Arn
+      Code:
+        ZipFile: !Sub |
+          import json
+          import base64
+          import cfnresponse
+          import logging
+
+
+          def handler(event, context):
+              print(event)
+              status = cfnresponse.SUCCESS
+              physical_id = event.get('PhysicalResourceId')
+              responseData = {}
+              try:
+                  if  (event['RequestType'] == 'Create' or event['RequestType'] == 'Update'):
+                      id = {
+                          "ClusterID": event['ResourceProperties']['ClusterID'],
+                          "Region": event['ResourceProperties']['Region'],
+                          "Name": event['ResourceProperties']['Name'],
+                          "Namespace": event['ResourceProperties']['Namespace']
+                      }
+
+                      responseData['ID'] = base64.standard_b64encode(bytes(json.dumps(id), encoding='utf8')).decode("utf-8").rstrip("=")
+                      print(responseData['ID'])
+              except Exception:
+                  logging.error('Unhandled exception', exc_info=True)
+                  status = cfnresponse.FAILED
+              finally:
+                  cfnresponse.send(event, context, status, responseData, physicalResourceId=physical_id)
+  ServerIDGen:
+    Type: "AWS::CloudFormation::CustomResource"
+    Properties:
+      ServiceToken: !GetAtt IDGenFunction.Arn
+      ClusterID: eks
+      Region: !Ref AWS::Region
+      Name: trendmicro
+      Namespace: default
+Outputs:
+  ClusterName:
+    Value: "eks"
+    Export:
+      Name: TrendMicroContractTestClusterName
+  ReleaseName:
+    Value: "trendmicro"
+    Export:
+      Name: TrendMicroContractTestReleaseName
+  HelmRoleArn:
+    Value: "arn:aws:iam::855798525220:role/awsqs-kubernetes-helm-role-stack-ExecutionRole-H8GSQO3J5TFY"
+    Export:
+      Name: TrendMicroContractTestHelmRoleArn
+  ServerID:
+    Value: !GetAtt ServerIDGen.ID
+    Export:
+      Name: TrendMicroContractTestID
