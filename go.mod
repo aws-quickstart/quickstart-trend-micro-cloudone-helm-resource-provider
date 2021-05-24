@@ -1,4 +1,4 @@
-module github.com/aws-quickstart/trendmicro-cloudone-helm-resource-provider
+module github.com/aws-quickstart/quickstart-trend-micro-cloudone-helm-resource-provider
 
 go 1.16
 
