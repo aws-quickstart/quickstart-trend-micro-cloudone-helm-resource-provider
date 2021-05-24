@@ -4,7 +4,7 @@ go 1.16
 
 require (
 	github.com/aws-cloudformation/cloudformation-cli-go-plugin v1.0.3
-	github.com/aws-quickstart/quickstart-helm-resource-provider v1.0.0
+	github.com/aws-quickstart/quickstart-helm-resource-provider v1.0.1
 	github.com/aws/aws-lambda-go v1.23.0
 	github.com/aws/aws-sdk-go v1.38.22
 	github.com/stretchr/testify v1.7.0
