@@ -84,30 +84,11 @@ Resources:
             Action: sts:AssumeRole
       ManagedPolicyArns:
         - !Sub 'arn:${AWS::Partition}:iam::aws:policy/AmazonS3ReadOnlyAccess'
-  VPCStack:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: !Sub 'https://aws-quickstart.s3.us-east-1.amazonaws.com/quickstart-aws-vpc/templates/aws-vpc.template'
-      Parameters:
-        AvailabilityZones: !Sub
-                            - "${Sub1},${Sub2}"
-                            - Sub1: !Select [ "0", Fn::GetAZs: !Ref 'AWS::Region']
-                              Sub2: !Select [ "1", Fn::GetAZs: !Ref 'AWS::Region']
-        NumberOfAZs: 2
-        PrivateSubnet1ACIDR: '10.0.0.0/24'
-        PrivateSubnet2ACIDR: '10.0.1.0/24'
-        PrivateSubnet3ACIDR: '10.0.2.0/24'
-        PrivateSubnetATag2: "kubernetes.io/role/internal-elb="
-        PublicSubnet1CIDR: '10.0.10.0/24'
-        PublicSubnet2CIDR: '10.0.11.0/24'
-        PublicSubnet3CIDR: '10.0.12.0/24'
-        PublicSubnetTag2: "kubernetes.io/role/elb="
-        VPCCIDR: '10.0.0.0/16'
   ControlPlaneSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: Cluster communication
-      VpcId: !GetAtt VPCStack.Outputs.VPCID
+      VpcId: !ImportValue helm-resource-provider-contract-tests-vpc-VPCID
   Cluster:
     Type: "AWSQS::EKS::Cluster"
     Properties:
@@ -117,8 +98,8 @@ Resources:
         ServiceIpv4Cidr: "192.168.0.0/16"
       ResourcesVpcConfig:
         SubnetIds:
-          - !GetAtt VPCStack.Outputs.PrivateSubnet1AID
-          - !GetAtt VPCStack.Outputs.PrivateSubnet2AID
+          - !ImportValue helm-resource-provider-contract-tests-vpc-PrivateSubnet1AID
+          - !ImportValue helm-resource-provider-contract-tests-vpc-PrivateSubnet2AID
         SecurityGroupIds:
           - !Ref ControlPlaneSecurityGroup
         PublicAccessCidrs:
@@ -153,8 +134,8 @@ Resources:
         DesiredSize: 1
         MaxSize: 3
       Subnets:
-        - !GetAtt VPCStack.Outputs.PrivateSubnet1AID
-        - !GetAtt VPCStack.Outputs.PrivateSubnet2AID
+        - !ImportValue helm-resource-provider-contract-tests-vpc-PrivateSubnet1AID
+        - !ImportValue helm-resource-provider-contract-tests-vpc-PrivateSubnet2AID
   IDGenRole:
     Type: AWS::IAM::Role
     Properties:
