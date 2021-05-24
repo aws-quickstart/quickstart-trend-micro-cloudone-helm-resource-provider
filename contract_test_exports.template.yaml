@@ -7,14 +7,17 @@ Parameters:
     Type: String
     Default: trend-contract-test
   AdmissionControllerAPIKey:
-    Type: String
+    Type: AWS::SSM::Parameter::Value<String>
     NoEcho: true
+    Default: /cloudformation-contract-test/trendmicro/AdmissionControllerAPIKey
   RuntimeSecurityAPIKey:
-    Type: String
+    Type: AWS::SSM::Parameter::Value<String>
     NoEcho: true
+    Default: /cloudformation-contract-test/trendmicro/RuntimeSecurityAPIKey
   RuntimeSecuritySecret:
-    Type: String
+    Type: AWS::SSM::Parameter::Value<String>
     NoEcho: true
+    Default: /cloudformation-contract-test/trendmicro/RuntimeSecuritySecret
 Resources:
   ControlPlaneRole:
     Type: "AWS::IAM::Role"
