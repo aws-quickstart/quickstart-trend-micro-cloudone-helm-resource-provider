@@ -1,6 +1,6 @@
 {
   "artifact_type": "RESOURCE",
-  "typeName": "TrendMicro::CloudOne::ContainerSecurity",
+  "typeName": "TrendMicro::CloudOne::Helm",
   "language": "go",
   "runtime": "go1.x",
   "entrypoint": "handler",
@@ -12,7 +12,7 @@
     "force": false,
     "type_name": null,
     "artifact_type": null,
-    "import_path": "github.com/arunbhagyanath/trendmicro-cloudone-containersecurity",
+    "import_path": "github.com/aws-quickstart/quickstart-trend-micro-cloudone-helm-resource-provider",
     "protocolVersion": "2.0.0",
     "pluginVersion": "2.0.4"
   }
