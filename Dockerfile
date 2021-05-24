@@ -12,4 +12,4 @@ RUN GOPROXY=direct go mod download
 
 RUN GOPROXY=direct make -f Makefile.package package
 
-CMD mkdir -p /output/ && mv /build/trendmicro-cloudone-containersecurity.zip /output/
+CMD mkdir -p /output/ && mv /build/trendmicro-cloudone-helm.zip /output/

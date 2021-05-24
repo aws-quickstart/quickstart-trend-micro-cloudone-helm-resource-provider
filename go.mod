@@ -1,4 +1,4 @@
-module github.com/arunbhagyanath/trendmicro-cloudone-containersecurity
+module github.com/aws-quickstart/trendmicro-cloudone-helm-resource-provider
 
 go 1.16
 

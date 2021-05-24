@@ -1,4 +1,4 @@
-# TrendMicro::CloudOne::ContainerSecurity Values
+# TrendMicro::CloudOne::Helm Values
 
 Custom Values can optionally be specified
 

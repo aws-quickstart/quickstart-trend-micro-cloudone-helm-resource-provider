@@ -1,4 +1,4 @@
-# TrendMicro::CloudOne::ContainerSecurity
+# TrendMicro::CloudOne::Helm
 
 An example resource schema demonstrating some basic constructs and validation rules.
 
@@ -10,7 +10,7 @@ To declare this entity in your AWS CloudFormation template, use the following sy
 
 <pre>
 {
-    "Type" : "TrendMicro::CloudOne::ContainerSecurity",
+    "Type" : "TrendMicro::CloudOne::Helm",
     "Properties" : {
         "<a href="#clusterid" title="ClusterID">ClusterID</a>" : <i>String</i>,
         "<a href="#kubeconfig" title="KubeConfig">KubeConfig</a>" : <i>String</i>,
@@ -31,7 +31,7 @@ To declare this entity in your AWS CloudFormation template, use the following sy
 ### YAML
 
 <pre>
-Type: TrendMicro::CloudOne::ContainerSecurity
+Type: TrendMicro::CloudOne::Helm
 Properties:
     <a href="#clusterid" title="ClusterID">ClusterID</a>: <i>String</i>
     <a href="#kubeconfig" title="KubeConfig">KubeConfig</a>: <i>String</i>

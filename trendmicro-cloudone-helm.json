@@ -1,5 +1,5 @@
 {
-    "typeName": "TrendMicro::CloudOne::ContainerSecurity",
+    "typeName": "TrendMicro::CloudOne::Helm",
     "description": "An example resource schema demonstrating some basic constructs and validation rules.",
     "sourceUrl": "https://github.com/arunbhagyanath/qs-sysdig.git",
     "definitions": {

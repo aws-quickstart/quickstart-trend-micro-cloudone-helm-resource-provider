@@ -6,13 +6,14 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/arunbhagyanath/trendmicro-cloudone-containersecurity/cmd/resource"
 	"github.com/aws-cloudformation/cloudformation-cli-go-plugin/cfn"
 	"github.com/aws-cloudformation/cloudformation-cli-go-plugin/cfn/handler"
+	"github.com/aws-quickstart/quickstart-trend-micro-cloudone-helm-resource-provider/cmd/resource"
 )
 
 // Handler is a container for the CRUDL actions exported by resources
 type Handler struct{}
+
 
 // Create wraps the related Create function exposed by the resource code
 func (r *Handler) Create(req handler.Request) handler.ProgressEvent {
