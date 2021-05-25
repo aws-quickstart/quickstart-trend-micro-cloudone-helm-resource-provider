@@ -6,4 +6,5 @@
     "cloudOne.admissionController.apiKey": "{{TrendMicroContractTestAdmissionControllerAPIKey}}",
     "cloudOne.runtimeSecurity.apiKey": "{{TrendMicroContractTestRuntimeSecurityAPIKey}}",
     "cloudOne.runtimeSecurity.secret": "{{TrendMicroContractTestRuntimeSecuritySecret}}"
-  },
+  }
+}
