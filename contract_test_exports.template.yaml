@@ -71,6 +71,7 @@ Resources:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                   - lambda:*
+                  - cloudformation:ListExports
                 Resource: '*'
       AssumeRolePolicyDocument:
         Version: 2012-10-17
