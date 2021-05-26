@@ -1,7 +1,7 @@
 {
     "typeName": "TrendMicro::CloudOne::Helm",
-    "description": "An example resource schema demonstrating some basic constructs and validation rules.",
-    "sourceUrl": "https://github.com/arunbhagyanath/qs-sysdig.git",
+    "description": "Deploys Trend Micro Cloud One Container Security into EKS clusters using helm.",
+    "sourceUrl": "https://github.com/aws-quickstart/quickstart-trend-micro-cloudone-helm-resource-provider.git",
     "definitions": {
         "Arn": {
             "type": "string",
@@ -34,7 +34,7 @@
             "type": "string"
         },
         "Values": {
-            "description": "Custom Values can optionally be specified",
+            "description": "Values to provide to the helm chart, note that an API key is required. For supported values and documentation see: https://github.com/trendmicro/cloudone-container-security-helm/blob/master/values.yaml",
             "type": "object",
             "additionalProperties": false,
             "patternProperties": {
