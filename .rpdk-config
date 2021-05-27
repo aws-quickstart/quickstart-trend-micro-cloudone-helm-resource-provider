@@ -1,6 +1,6 @@
 {
   "artifact_type": "RESOURCE",
-  "typeName": "TrendMicro::CloudOne::Helm",
+  "typeName": "TrendMicro::CloudOneContainer::Helm",
   "language": "go",
   "runtime": "go1.x",
   "entrypoint": "handler",

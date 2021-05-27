@@ -1,4 +1,4 @@
-# TrendMicro::CloudOne::Helm VPCConfiguration
+# TrendMicro::CloudOneContainer::Helm VPCConfiguration
 
 For network connectivity to Cluster inside VPC
 
