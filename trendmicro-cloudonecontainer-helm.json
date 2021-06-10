@@ -2,6 +2,7 @@
     "typeName": "TrendMicro::CloudOneContainer::Helm",
     "description": "Deploys Trend Micro Cloud One Container Security into EKS clusters using helm.",
     "sourceUrl": "https://github.com/aws-quickstart/quickstart-trend-micro-cloudone-helm-resource-provider.git",
+    "documentationUrl": "https://github.com/trendmicro/cloudone-container-security-helm/blob/master/README.md",
     "definitions": {
         "Arn": {
             "type": "string",
