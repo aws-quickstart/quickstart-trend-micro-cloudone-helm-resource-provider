@@ -41,8 +41,8 @@ Documentation for the helm chart and it's values are available [here](https://gi
 ```yaml
 AWSTemplateFormatVersion: "2010-09-09"
 Resources:
-  KubeStateMetrics:
-    Type: "AWSQS::Kubernetes::Helm"
+  CloudOneHelmRelease:
+    Type: "TrendMicro::CloudOneContainer::Helm"
     Properties:
       ClusterID: my-cluster-name
       Name: trendmicro-cloudone
